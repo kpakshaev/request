@@ -323,7 +323,7 @@ Request.prototype.init = function (options) {
       length = self.body.length
     }
     if (length) {
-      if (!self.hasHeader('content-length')) self.setHeader('content-length', length)
+      if (!self.hasHeader('Content-Length')) self.setHeader('Content-Length', length)
     } else {
       throw new Error('Argument error, options.body.')
     }
@@ -369,7 +369,7 @@ Request.prototype.init = function (options) {
     if (self.ntick && self._started) throw new Error("You cannot pipe to this stream after the outbound request has started.")
     self.src = src
     if (isReadStream(src)) {
-      if (!self.hasHeader('content-type')) self.setHeader('content-type', mime.lookup(src.path))
+      if (!self.hasHeader('Content-Type')) self.setHeader('Content-Type', mime.lookup(src.path))
     } else {
       if (src.headers) {
         for (var i in src.headers) {
@@ -378,8 +378,8 @@ Request.prototype.init = function (options) {
           }
         }
       }
-      if (self._json && !self.hasHeader('content-type'))
-        self.setHeader('content-type', 'application/json')
+      if (self._json && !self.hasHeader('Content-Type'))
+        self.setHeader('Content-Type', 'application/json')
       if (src.method && !self.explicitMethod) {
         self.method = src.method
       }
@@ -411,7 +411,7 @@ Request.prototype.init = function (options) {
       self.requestBodyStream.pipe(self)
     } else if (!self.src) {
       if (self.method !== 'GET' && typeof self.method !== 'undefined') {
-        self.setHeader('content-length', 0)
+        self.setHeader('Content-Length', 0)
       }
       self.end()
     }
@@ -568,8 +568,8 @@ Request.prototype.start = function () {
   self.method = self.method || 'GET'
   self.href = self.uri.href
 
-  if (self.src && self.src.stat && self.src.stat.size && !self.hasHeader('content-length')) {
-    self.setHeader('content-length', self.src.stat.size)
+  if (self.src && self.src.stat && self.src.stat.size && !self.hasHeader('Content-Length')) {
+    self.setHeader('Content-Length', self.src.stat.size)
   }
   if (self._aws) {
     self.aws(self._aws, true)
@@ -785,8 +785,8 @@ Request.prototype.onResponse = function (response) {
       delete self._form
       if (self.headers) {
         if (self.hasHeader('host')) delete self.headers[self.hasHeader('host')]
-        if (self.hasHeader('content-type')) delete self.headers[self.hasHeader('content-type')]
-        if (self.hasHeader('content-length')) delete self.headers[self.hasHeader('content-length')]
+        if (self.hasHeader('Content-Type')) delete self.headers[self.hasHeader('Content-Type')]
+        if (self.hasHeader('Content-Length')) delete self.headers[self.hasHeader('Content-Length')]
       }
     }
 
@@ -905,14 +905,14 @@ Request.prototype.pipeDest = function (dest) {
   var response = this.response
   // Called after the response is received
   if (dest.headers && !dest.headersSent) {
-    if (hasHeader('content-type', response.headers)) {
-      var ctname = hasHeader('content-type', response.headers)
+    if (hasHeader('Content-Type', response.headers)) {
+      var ctname = hasHeader('Content-Type', response.headers)
       if (dest.setHeader) dest.setHeader(ctname, response.headers[ctname])
       else dest.headers[ctname] = response.headers[ctname]
     }
 
-    if (hasHeader('content-length', response.headers)) {
-      var clname = hasHeader('content-length', response.headers)
+    if (hasHeader('Content-Length', response.headers)) {
+      var clname = hasHeader('Content-Length', response.headers)
       if (dest.setHeader) dest.setHeader(clname, response.headers[clname])
       else dest.headers[clname] = response.headers[clname]
     }
@@ -971,7 +971,7 @@ Request.prototype.qs = function (q, clobber) {
 }
 Request.prototype.form = function (form) {
   if (form) {
-    this.setHeader('content-type', 'application/x-www-form-urlencoded; charset=utf-8')
+    this.setHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
     this.body = qs.stringify(form).toString('utf8')
     return this
   }
@@ -983,10 +983,10 @@ Request.prototype.multipart = function (multipart) {
   var self = this
   self.body = []
 
-  if (!self.hasHeader('content-type')) {
-    self.setHeader('content-type', 'multipart/related; boundary=' + self.boundary)
+  if (!self.hasHeader('Content-Type')) {
+    self.setHeader('Content-Type', 'multipart/related; boundary=' + self.boundary)
   } else {
-    self.setHeader('content-type', self.headers['content-type'].split(';')[0] + '; boundary=' + self.boundary)
+    self.setHeader('Content-Type', self.headers['content-type'].split(';')[0] + '; boundary=' + self.boundary)
   }
 
   if (!multipart.forEach) throw new Error('Argument error, options.multipart.')
@@ -1020,11 +1020,11 @@ Request.prototype.json = function (val) {
   if (typeof val === 'boolean') {
     if (typeof this.body === 'object') {
       this.body = safeStringify(this.body)
-      self.setHeader('content-type', 'application/json')
+      self.setHeader('Content-Type', 'application/json')
     }
   } else {
     this.body = safeStringify(val)
-    self.setHeader('content-type', 'application/json')
+    self.setHeader('Content-Type', 'application/json')
   }
   return this
 }
@@ -1066,7 +1066,7 @@ Request.prototype.aws = function (opts, now) {
     , secret: opts.secret
     , verb: this.method.toUpperCase()
     , date: date
-    , contentType: this.getHeader('content-type') || ''
+    , contentType: this.getHeader('Content-Type') || ''
     , md5: this.getHeader('content-md5') || ''
     , amazonHeaders: aws.canonicalizeHeaders(this.headers)
     }
@@ -1107,8 +1107,8 @@ Request.prototype.hawk = function (opts) {
 
 Request.prototype.oauth = function (_oauth) {
   var form
-  if (this.hasHeader('content-type') &&
-      this.getHeader('content-type').slice(0, 'application/x-www-form-urlencoded'.length) ===
+  if (this.hasHeader('Content-Type') &&
+      this.getHeader('Content-Type').slice(0, 'application/x-www-form-urlencoded'.length) ===
         'application/x-www-form-urlencoded'
      ) {
     form = qs.parse(this.body)
